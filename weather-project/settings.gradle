@@ -1,1 +1,6 @@
 rootProject.name = 'weather-project'
+
+include 'api-gateway'
+include 'discovery-server'
+include 'server1'
+include 'server2'
