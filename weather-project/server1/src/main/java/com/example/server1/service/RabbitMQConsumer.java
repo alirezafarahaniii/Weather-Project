@@ -19,16 +19,11 @@ public class RabbitMQConsumer {
         try {
             // Process the message
             LOGGER.info(String.format("Received message -> %s", message));
-            channel.basicAck(deliveryTag, false);
             // Your processing logic here
         } catch (Exception e) {
             LOGGER.error("Error processing message: " + e.getMessage());
             // Handle the error, e.g., log it, send a notification, or perform error-specific actions
-            try {
-                channel.basicNack(deliveryTag, false, true);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+
         }
     }
 }

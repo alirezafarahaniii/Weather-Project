@@ -16,14 +16,15 @@ public class RabbitMQProducer {
 
     @Value("${rabbitmq.routing.key}")
     private String routingKey;
-
+    private final Notify notify;
     private static final int maxRetryAttempts = 3;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQProducer.class);
 
     private RabbitTemplate rabbitTemplate;
 
-    public RabbitMQProducer(RabbitTemplate rabbitTemplate) {
+    public RabbitMQProducer(Notify notify, RabbitTemplate rabbitTemplate) {
+        this.notify = notify;
         this.rabbitTemplate = rabbitTemplate;
     }
 
@@ -33,7 +34,8 @@ public class RabbitMQProducer {
             LOGGER.info(String.format("Message sent -> %s", message));
             rabbitTemplate.convertAndSend(exchange, routingKey, message);
         } catch (Exception e) {
-            LOGGER.error("Error sending message: " + e.getMessage());
+            LOGGER.error("******CONNECTION LOST TO SERVER 2 ******" + e.getMessage());
+            notify.sendEmailForNotifyAdmin("rabbitmq server is gone","******CONNECTION LOST TO SERVER 2 ******" + e.getMessage());
             // You can handle or log the error here, and the method will be retried
             throw e; // Re-throw the exception to trigger the retry
         }

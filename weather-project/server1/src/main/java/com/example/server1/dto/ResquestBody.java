@@ -1,4 +1,4 @@
-package com.project.server2.dto;
+package com.example.server1.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,13 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-
-public class LocationDto {
-
-    private String name;
-
-    private String lat;
-
-    private String lon;
-
+public class ResquestBody {
+    private String user_id;
+    private String type;
+    private String path;
+    private LocationDto body;
 }

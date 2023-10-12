@@ -10,13 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-
-public class LocationDto {
-
-    private String name;
-
-    private String lat;
-
-    private String lon;
-
+public class RequestBodyDto {
+    private String user_id;
+    private String type;
+    private String path;
+    private LocationDto body;
 }

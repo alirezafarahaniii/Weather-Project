@@ -1,5 +1,6 @@
 package com.project.server2.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,14 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-
-
-public class LocationDto {
-
-    private String name;
-
-    private String lat;
-
-    private String lon;
-
+public class ResponseDto {
+    private String user_id;
+    private String message;
+    private Weather payload;
 }
+
