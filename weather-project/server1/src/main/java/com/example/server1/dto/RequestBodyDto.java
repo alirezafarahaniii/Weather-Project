@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class ResquestBody {
+public class RequestBodyDto {
     private String user_id;
     private String type;
     private String path;

@@ -1,44 +1,58 @@
 package com.example.server1.service;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate.ConfirmCallback;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
 
 @Service
-public class RabbitMQProducer {
+public class RabbitMQProducer implements ConfirmCallback {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQProducer.class);
+    private static final int MAX_RETRY_ATTEMPTS = 3;
 
     @Value("${rabbitmq.exchange.name}")
     private String exchange;
 
     @Value("${rabbitmq.routing.key}")
     private String routingKey;
+
     private final Notify notify;
-    private static final int maxRetryAttempts = 3;
+    private final RabbitTemplate rabbitTemplate;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQProducer.class);
-
-    private RabbitTemplate rabbitTemplate;
-
+    @Autowired
     public RabbitMQProducer(Notify notify, RabbitTemplate rabbitTemplate) {
         this.notify = notify;
         this.rabbitTemplate = rabbitTemplate;
+        this.rabbitTemplate.setMandatory(true); // Required for publisher confirms
+        this.rabbitTemplate.setConfirmCallback(this);
     }
 
-    @Retryable(maxAttempts = maxRetryAttempts, backoff = @Backoff(delay = 1000)) // Retry 3 times with a 1-second delay between attempts
-    public void sendMessage(String message){
-        try {
-            LOGGER.info(String.format("Message sent -> %s", message));
-            rabbitTemplate.convertAndSend(exchange, routingKey, message);
-        } catch (Exception e) {
-            LOGGER.error("******CONNECTION LOST TO SERVER 2 ******" + e.getMessage());
-            notify.sendEmailForNotifyAdmin("rabbitmq server is gone","******CONNECTION LOST TO SERVER 2 ******" + e.getMessage());
-            // You can handle or log the error here, and the method will be retried
-            throw e; // Re-throw the exception to trigger the retry
-        }
+    @Retryable(maxAttempts = MAX_RETRY_ATTEMPTS, backoff = @Backoff(delay = 1000))
+    // Retry 3 times with a 1-second delay between attempts
+    public void sendMessage(String message) {
+        CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
+        LOGGER.info("Sending message: " + message);
+        rabbitTemplate.convertAndSend(exchange, routingKey, message, correlationData);
 
+    }
+
+
+    @Override
+    public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+        if (ack) {
+            LOGGER.info("Message with correlation ID {} was acknowledged", correlationData.getId());
+        } else {
+            LOGGER.error("Message with correlation ID {} was not acknowledged: {}", correlationData.getId(), cause);
+            // Handle nack, e.g., log the error, requeue the message, or perform error-specific actions
+            notify.sendEmailForNotifyAdmin("RabbitMQ message not acknowledged", "Message ID: " + correlationData.getId() + ", Cause: " + cause);
+        }
     }
 }
