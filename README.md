@@ -1,8 +1,8 @@
 # Weather-Project
 
-connection of two server is stablished by RabbitMQ
+connection of two servers is established by RabbitMQ
 #########################################################################
-you cab call apis directly from server1 but using Gateway is optional
+you can call apis directly from server1 but using Gateway is optional
 #########################################################################
 
 post api : http://localhost:9090/api/v1/addCity
@@ -30,5 +30,5 @@ password = password
 
 weather fetches from https://rapidapi.com/weatherapi/api/weatherapi-com
 
-due to connection lost server1 send an email to defined email 
+due to a connection loss server1 send an email to the defined email 
 
