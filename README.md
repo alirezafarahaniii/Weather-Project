@@ -71,3 +71,10 @@ weather fetches from https://rapidapi.com/weatherapi/api/weatherapi-com
 
 due to a connection loss, server1 sends an email to the defined email 
 
+
+Access Actuator Endpoints: You can access Actuator endpoints via HTTP requests. For example:
+
+Health Endpoint: http://localhost:9090/actuator/health
+Info Endpoint: http://localhost:9090/actuator/info
+Metrics Endpoint: http://localhost:9090/actuator/metrics
+
